@@ -1,13 +1,10 @@
 import { dirname, extname, resolve } from 'path';
-import { promisify } from 'util';
 
 import { createFilter } from '@rollup/pluginutils';
 
-import resolveModule from 'resolve';
+import resolveId from './resolveId';
 
 import { realpathSync } from './fs';
-
-const resolveId = promisify(resolveModule);
 
 // returns the imported package name for bare module imports
 export function getPackageName(id) {
@@ -161,7 +158,12 @@ export function normalizeInput(input) {
 
 // Resolve module specifiers in order. Promise resolves to the first module that resolves
 // successfully, or the error that resulted from the last attempted module resolution.
-export function resolveImportSpecifiers(importSpecifierList, resolveOptions) {
+export function resolveImportSpecifiers(
+  importSpecifierList,
+  resolveOptions,
+  exportConditions,
+  warn
+) {
   let promise = Promise.resolve();
 
   for (let i = 0; i < importSpecifierList.length; i++) {
@@ -171,12 +173,14 @@ export function resolveImportSpecifiers(importSpecifierList, resolveOptions) {
         return value;
       }
 
-      return resolveId(importSpecifierList[i], resolveOptions).then((result) => {
-        if (!resolveOptions.preserveSymlinks) {
-          result = realpathSync(result);
+      return resolveId(importSpecifierList[i], resolveOptions, exportConditions, warn).then(
+        (result) => {
+          if (!resolveOptions.preserveSymlinks) {
+            result = realpathSync(result);
+          }
+          return result;
         }
-        return result;
-      });
+      );
     });
 
     if (i < importSpecifierList.length - 1) {

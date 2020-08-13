@@ -10,6 +10,13 @@ export const DEFAULTS: {
 
 export interface RollupNodeResolveOptions {
   /**
+   * Conditions used to select exports defined using node js [package exports](https://nodejs.org/api/esm.html#esm_packages).
+   * Conditions are evaluated left to right, returning the first match that is found.
+   * Setting this property overwrites the default values.
+   */
+  exportConditions?: string[];
+
+  /**
    * If `true`, instructs the plugin to use the `"browser"` property in `package.json`
    * files to specify alternative files to load for bundling. This is useful when
    * bundling for a browser environment. Alternatively, a value of `'browser'` can be

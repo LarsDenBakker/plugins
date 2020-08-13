@@ -34,15 +34,22 @@ export default {
   input: 'src/index.js',
   output: {
     dir: 'output',
-    format: 'cjs'
+    format: 'cjs',
   },
-  plugins: [nodeResolve()]
+  plugins: [nodeResolve()],
 };
 ```
 
 Then call `rollup` either via the [CLI](https://www.rollupjs.org/guide/en/#command-line-reference) or the [API](https://www.rollupjs.org/guide/en/#javascript-api).
 
 ## Options
+
+### `exportConditions`
+
+Type: `Array[...String]`<br>
+Default: `['module', 'import']`
+
+Conditions used to select exports defined using node js [package entrypoints](https://nodejs.org/api/esm.html#esm_packages). Conditions are evaluated left to right, returning the first match that is found. Setting this property overwrites the default values.
 
 ### `browser`
 
@@ -111,6 +118,8 @@ Valid values: `['browser', 'jsnext:main', 'module', 'main']`
 
 Specifies the properties to scan within a `package.json`, used to determine the bundle entry point. The order of property names is significant, as the first-found property is used as the resolved entry point. If the array contains `'browser'`, key/values specified in the `package.json` `browser` property will be used.
 
+If a package is using [package entrypoints](https://nodejs.org/api/esm.html#esm_packages) by specifying an `exports` field, that always takes priority over `mainFields`.
+
 ### `only`
 
 DEPRECATED: use "resolveOnly" instead
@@ -164,9 +173,9 @@ export default {
   output: {
     file: 'bundle.js',
     format: 'iife',
-    name: 'MyModule'
+    name: 'MyModule',
   },
-  plugins: [resolve(), commonjs()]
+  plugins: [resolve(), commonjs()],
 };
 ```
 

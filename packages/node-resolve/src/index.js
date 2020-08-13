@@ -18,7 +18,7 @@ import {
 const builtins = new Set(builtinList);
 const ES6_BROWSER_EMPTY = '\0node-resolve:empty.js';
 const nullFn = () => null;
-const deepFreeze = object => {
+const deepFreeze = (object) => {
   Object.freeze(object);
 
   for (const value of Object.values(object)) {
@@ -30,6 +30,7 @@ const deepFreeze = object => {
   return object;
 };
 const defaults = {
+  exportConditions: ['module', 'import'],
   customResolveOptions: {},
   dedupe: [],
   // It's important that .mjs is listed before .js so that Rollup will interpret npm modules
@@ -42,6 +43,7 @@ export const DEFAULTS = deepFreeze(deepMerge({}, defaults));
 export function nodeResolve(opts = {}) {
   const options = Object.assign({}, defaults, opts);
   const { customResolveOptions, extensions, jail } = options;
+  const exportConditions = [...options.exportConditions, 'default'];
   const warnings = [];
   const packageInfoCache = new Map();
   const idToPackageInfo = new Map();
@@ -220,7 +222,13 @@ export function nodeResolve(opts = {}) {
       resolveOptions = Object.assign(resolveOptions, customResolveOptions);
 
       try {
-        let resolved = await resolveImportSpecifiers(importSpecifierList, resolveOptions);
+        const warn = (...args) => this.warn(...args);
+        let resolved = await resolveImportSpecifiers(
+          importSpecifierList,
+          resolveOptions,
+          exportConditions,
+          warn
+        );
 
         if (resolved && packageBrowserField) {
           if (Object.prototype.hasOwnProperty.call(packageBrowserField, resolved)) {
